@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Local Agent Launcher</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: #f7f8fa;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 420px;
+        margin: 48px auto;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+        padding: 32px 32px 24px 32px;
+        position: relative;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 32px;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #222;
+      }
+      .stepper {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 32px;
+      }
+      .step {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e0e4ea;
+        color: #888;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: background 0.3s, color 0.3s;
+      }
+      .step.active {
+        background: #4f8cff;
+        color: #fff;
+      }
+      .step.done {
+        background: #2ecc71;
+        color: #fff;
+      }
+      .carousel {
+        position: relative;
+        min-height: 180px;
+      }
+      .carousel-step {
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        left: 0; right: 0; top: 0; bottom: 0;
+        transition: opacity 0.5s;
+      }
+      .carousel-step.active {
+        opacity: 1;
+        pointer-events: auto;
+        position: relative;
+        transition: opacity 0.5s;
+      }
+      .btn {
+        background: #4f8cff;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 12px 0 0 0;
+        cursor: pointer;
+        transition: background 0.2s;
+        box-shadow: 0 2px 8px rgba(79,140,255,0.08);
+      }
+      .btn:disabled {
+        background: #b3c6f7;
+        cursor: not-allowed;
+      }
+      .input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #dbe2ef;
+        border-radius: 6px;
+        font-size: 1rem;
+        margin: 8px 0 0 0;
+        background: #f7f8fa;
+        color: #222;
+      }
+      .status {
+        margin-top: 16px;
+        color: #4f8cff;
+        font-size: 1rem;
+        min-height: 24px;
+        text-align: center;
+      }
+      .pairing-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 12px;
+      }
+      .pairing-row input {
+        flex: 1;
+      }
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 3px solid #b3c6f7;
+        border-top: 3px solid #4f8cff;
+        border-radius: 50%;
+        display: inline-block;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Local Agent Launcher</h2>
+      <div class="stepper">
+        <div class="step" id="step-0">1</div>
+        <div class="step" id="step-1">2</div>
+        <div class="step" id="step-2">3</div>
+        <div class="step" id="step-3">4</div>
+        <div class="step" id="step-4">5</div>
+        <div class="step" id="step-5">6</div>
+      </div>
+      <div class="carousel">
+        <div class="carousel-step" id="carousel-0">
+          <div>Select your local agent folder (the folder containing .env).</div>
+          <button class="btn" id="select-agent-folder">Select Local Agent Folder</button>
+          <input class="input" id="agent-folder-path" type="text" placeholder="No agent folder selected" readonly />
+          <div class="status" id="status-0"></div>
+        </div>
+        <div class="carousel-step" id="carousel-1">
+          <div>Check & install all required dependencies for the agent.</div>
+          <button class="btn" id="install-deps">Check & Install Dependencies</button>
+          <span id="dep-spinner" style="display:none; margin-left:10px; vertical-align:middle;"><span class="spinner"></span></span>
+          <div id="dep-progress" style="margin-top: 8px; color: #444; font-size: 0.95em;"></div>
+          <div class="status" id="status-1"></div>
+        </div>
+        <div class="carousel-step" id="carousel-2">
+          <div>Select the folder to publish to the backend.</div>
+          <button class="btn" id="select-folder">Select Video Folder</button>
+          <input class="input" id="folder-path" type="text" placeholder="No folder selected" readonly />
+          <div class="status" id="status-2"></div>
+        </div>
+        <div class="carousel-step" id="carousel-3">
+          <div>Update the agent's .env file with the selected folder.</div>
+          <button class="btn" id="write-env">Update .env with Folder</button>
+          <div class="status" id="status-3"></div>
+        </div>
+        <div class="carousel-step" id="carousel-4">
+          <div>Start the local agent and generate the pairing code.</div>
+          <button class="btn" id="run-agent">Run Local Agent</button>
+          <div class="status" id="status-4"></div>
+        </div>
+        <div class="carousel-step" id="carousel-5">
+          <div>Copy the pairing code and paste it in your browser.</div>
+          <div class="pairing-row">
+            <input class="input" id="pairing-code" type="text" placeholder="Pairing code will appear" readonly />
+            <button class="btn" id="copy-code">Copy</button>
+          </div>
+          <div id="pairing-code-path" style="margin-top: 8px; color: #888; font-size: 12px;"></div>
+          <div class="status" id="status-5"></div>
+        </div>
+      </div>
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn" id="prev-step" style="margin-right:12px; display:none;">Back</button>
+        <button class="btn" id="next-step">Next</button>
+      </div>
+    </div>
+    <script src="renderer.js"></script>
+  </body>
+</html> 
