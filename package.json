@@ -1,0 +1,36 @@
+{
+  "name": "electron-app",
+  "version": "1.0.0",
+  "description": "Minimal Electron app",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "package-mac": "npx electron-packager . LocalAgentLauncher --platform=darwin --arch=arm64 --out=dist --overwrite",
+    "package-win": "npx electron-packager . LocalAgentLauncher --platform=win32 --arch=x64 --out=dist --overwrite",
+    "package-linux": "npx electron-packager . LocalAgentLauncher --platform=linux --arch=x64 --out=dist --overwrite"
+  },
+  "devDependencies": {
+    "electron": "28.2.4",
+    "electron-builder": "^26.0.12",
+    "electron-notarize": "^1.2.2",
+    "electron-packager": "^17.1.2"
+  },
+  "dependencies": {
+    "sudo-prompt": "^9.2.1",
+    "unzipper": "^0.12.3"
+  },
+  "author": "Your Name",
+  "build": {
+    "appId": "com.yourcompany.localagentlauncher",
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.utilities",
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "gatekeeperAssess": false
+    },
+    "afterSign": "scripts/notarize.js"
+  }
+}
